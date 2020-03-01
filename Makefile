@@ -13,6 +13,7 @@ LIN_CFLAGS = $(CFLAGS)
 LIN_LDFLAGS = $(LDFLAGS)
 
 VERSION=0.85.01
+MANVERSION=0.00.01
 VERSIONCODE=$(shell echo $(VERSION) | sed s/\\.//g | sed s/^0// )
 # variables for RPM creation
 TOPDIR=$(HOME)/rpmbuild
@@ -40,6 +41,7 @@ LIN_GUI_CFLAGS=$(CFLAGS) $(shell pkg-config --cflags gtk+-2.0 gmodule-2.0) -DGTK
 default: cli pktriggercord
 all: srczip rpm win pktriggercord_commandline.html
 cli: pktriggercord-cli
+manual: manual-mode
 
 MANS = pktriggercord-cli.1 pktriggercord.1
 SRCOBJNAMES = pslr pslr_enum pslr_scsi pslr_lens pslr_model pktriggercord-servermode
@@ -58,6 +60,9 @@ pslr.o: pslr_enum.o pslr_scsi.o pslr.c pslr.h
 
 pktriggercord-cli: pktriggercord-cli.c $(OBJS)
 	$(CC) $(LIN_CFLAGS) $^ -DVERSION='"$(VERSION)"' -o $@ $(LIN_LDFLAGS) -L.
+
+manual-mode: manual-mode.c $(OBJS)
+	$(CC) $(LIN_CFLAGS) $^ -DVERSION='"$(MANVERSION)"' -o $@ $(LIN_LDFLAGS) -L.
 
 pslr_scsi.o: pslr_scsi_win.c pslr_scsi_linux.c pslr_scsi_openbsd.c
 
@@ -193,7 +198,7 @@ windownload:
 localwin: WINMINGW=$(LOCALMINGW)
 localwin: WINGCC=$(LOCALMINGW)/mingw32/bin/i686-w64-mingw32-gcc
 
-winobjs:$(SRCOBJNAMES:=.c) 
+winobjs:$(SRCOBJNAMES:=.c)
 	$(foreach srcfile, $(SRCOBJNAMES:=.c), $(WINGCC) -DVERSION='"$(VERSION)"' -DPKTDATADIR=\".\" $(WIN_CFLAGS) -c $(srcfile);)
 
 winexternal: $(JSONDIR)/js0n.c $(JSONDIR)/js0n.h

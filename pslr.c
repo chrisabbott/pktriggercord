@@ -362,7 +362,7 @@ pslr_handle_t pslr_init( char *model, char *device ) {
     char **drives;
     const char *camera_name;
 
-    DPRINT("[C]\tplsr_init()\n");
+    printf("[C]\tplsr_init()\n");
 
     if ( device == NULL ) {
         drives = get_drives(&driveNum);
@@ -373,25 +373,25 @@ pslr_handle_t pslr_init( char *model, char *device ) {
         strncpy( drives[0], device, strlen( device ) );
         drives[0][strlen(device)]='\0';
     }
-    DPRINT("driveNum:%d\n",driveNum);
+    printf("driveNum:%d\n",driveNum);
     int i;
     for ( i=0; i<driveNum; ++i ) {
         pslr_result result = get_drive_info( drives[i], &fd, vendorId, sizeof(vendorId), productId, sizeof(productId));
 
-        DPRINT("\tChecking drive:  %s %s %s\n", drives[i], vendorId, productId);
+        printf("\tChecking drive:  %s %s %s\n", drives[i], vendorId, productId);
         if ( find_in_array( valid_vendors, sizeof(valid_vendors)/sizeof(valid_vendors[0]),vendorId) != -1
                 && find_in_array( valid_models, sizeof(valid_models)/sizeof(valid_models[0]), productId) != -1 ) {
             if ( result == PSLR_OK ) {
-                DPRINT("\tFound camera %s %s\n", vendorId, productId);
+                printf("\tFound camera %s %s\n", vendorId, productId);
                 pslr.fd = fd;
                 if ( model != NULL ) {
                     // user specified the camera model
                     camera_name = pslr_camera_name( &pslr );
-                    DPRINT("\tName of the camera: %s\n", camera_name);
+                    printf("\tName of the camera: %s\n", camera_name);
                     if ( str_comparison_i( camera_name, model, strlen( camera_name) ) == 0 ) {
                         return &pslr;
                     } else {
-                        DPRINT("\tIgnoring camera %s %s\n", vendorId, productId);
+                        printf("\tIgnoring camera %s %s\n", vendorId, productId);
                         pslr_shutdown ( &pslr );
                         pslr.id = 0;
                         pslr.model = NULL;
@@ -400,7 +400,7 @@ pslr_handle_t pslr_init( char *model, char *device ) {
                     return &pslr;
                 }
             } else {
-                DPRINT("\tCannot get drive info of Pentax camera. Please do not forget to install the program using 'make install'\n");
+                printf("\tCannot get drive info of Pentax camera. Please do not forget to install the program using 'make install'\n");
                 // found the camera but communication is not possible
                 close_drive( &fd );
                 continue;
@@ -410,7 +410,7 @@ pslr_handle_t pslr_init( char *model, char *device ) {
             continue;
         }
     }
-    DPRINT("\tcamera not found\n");
+    printf("\tcamera not found\n");
     return NULL;
 }
 
@@ -1597,7 +1597,6 @@ bool pslr_has_setting_by_name(pslr_handle_t *h, char *name) {
     return (setting_def != NULL);
 }
 
-
 int pslr_read_settings(pslr_handle_t *h) {
     ipslr_handle_t *p = (ipslr_handle_t *) h;
     int index=0;
@@ -1605,6 +1604,7 @@ int pslr_read_settings(pslr_handle_t *h) {
     int ret;
     while (index<SETTINGS_BUFFER_SIZE) {
         if ( (ret = pslr_read_setting(h, index, &value)) != PSLR_OK ) {
+            printf("pslr_read_setting != PSLR_OK\n");
             return ret;
         }
         p->settings_buffer[index] = value;
